@@ -1,0 +1,19 @@
+<div style="width: 50%; margin-bottom: 30px;">
+    <p><b>Name:</b> <%= product.name %></p>
+    <p><b>Price:</b> $<%= product.price %></p>
+
+    <% if (product.pictureURL != "") { %>
+        <img src="<%= product.pictureURL %>">
+    <% } %>
+    
+    <% if (product.description != "") { %>
+        <p><b>Description:</b> <%= product.description %></p>
+    <% } %>
+    <form action="/remove-product/<%= product.productID %>" method="POST">
+        <input type="submit" value="Delete Product" class="btn btn-secondary">
+    </form>
+
+    <form action="/edit-product/<%= product.productID %>" method="GET">
+        <input type="submit" value="Edit Product" class="btn btn-secondary">
+    </form>
+</div>

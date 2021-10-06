@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><%= title %></title>
+        <% include ../includes/header.ejs %>
+    </head>
+
+    <body>
+        <% include ../includes/banner.ejs%>
+        <div style="display: flex; align-items: center; flex-direction: column; padding-top: 10px;">
+
+            <% if (products.length == 0) { %>
+                <p>Search returned no results.</p>
+            <% } %>
+
+            <% for (product of products) {%>
+                <% include ../includes/product.ejs %>
+            <% } %>
+        </div>
+    </body>
+</html>

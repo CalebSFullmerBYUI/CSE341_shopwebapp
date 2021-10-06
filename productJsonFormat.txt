@@ -1,0 +1,10 @@
+    { "name": "",
+        "productID": 0,
+        "price": 0,
+        "description": "",
+        "specifications": [
+            {"specifiecation": "", "data": ""}
+            ],
+        "pictureURL": "",
+        "tags": ["", ""]
+        }
