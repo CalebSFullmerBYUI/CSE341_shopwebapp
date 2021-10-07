@@ -32,7 +32,7 @@ app.set("views", path.join(__dirname, "views"))
     .use(bodyParser({ extended: false }))
     .use("/", routes);
 
-mongoose.connect(MONGODB_URL, options/*"mongodb+srv://Heroku_access:APRp2e11dnPMMSgv@cse341work.we99f.mongodb.net/shop?retryWrites=true&w=majority"*/).then(result => {
+mongoose.connect(/*MONGODB_URL, options*/"mongodb+srv://Heroku_access:APRp2e11dnPMMSgv@cse341work.we99f.mongodb.net/shop?retryWrites=true&w=majority").then(result => {
     app.listen(process.env.PORT || 5000, () => {
         console.log("Listening for input.");
     });
