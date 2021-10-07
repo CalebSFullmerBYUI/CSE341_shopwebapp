@@ -8,7 +8,7 @@
     <body>
         <% include ../includes/banner.ejs%>
         <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
-            <form action="<% if (product.productID != -1) { %>/edit-product/<%= product.productID %><% } else { %>/add-product<% } %>" method="POST" style="display: flex; flex-direction: column; width: 50%;">
+            <form action="<% if (product.productID != -1) { %>/edit-product/<%= product._id %><% } else { %>/add-product<% } %>" method="POST" style="display: flex; flex-direction: column; width: 50%;">
                 <div style="margin-bottom: 10px;">
                     <label>Product Name</label>
                     <input type="text" name="productName" style="width: 100%" value="<%= product.name %>">

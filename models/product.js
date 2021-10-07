@@ -1,4 +1,25 @@
-const fs = require("fs");
+const mongoose = require("mongoose");
+
+const productSchema = new mongoose.Schema({
+    name: String,
+    productID: String,
+    price: Number,
+    description: String,
+    specifications: [
+        {
+            specification: String,
+            data: String
+        }
+    ],
+    pictureURL: String,
+    tags: [String]
+});
+
+module.exports = mongoose.model('Product', productSchema);
+
+
+
+/*const fs = require("fs");
 const path = require("path");
 const getDb = require('../utils/database').getDb;
 const mongodb = require("mongodb");
@@ -56,15 +77,13 @@ module.exports = class Product {
     }
 
     save() {
-        /*getProductsFromFile((products) => {
+        getProductsFromFile((products) => {
             removeProductFromArray(products, this.productID);
             products.push(this);
             fs.writeFile(p, JSON.stringify(products), (err) => {
                 console.log("Issue saving product.\n" + err);
             });
-        });*/
-
-        //
+        });
     }
 
     static removeProduct(id, cb) {
@@ -94,4 +113,4 @@ module.exports = class Product {
     static getProducts(cb) {
         getProductsFromFile(cb);
     }
-}
+}*/
