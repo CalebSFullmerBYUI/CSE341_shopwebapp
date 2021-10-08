@@ -229,7 +229,7 @@ exports.checkoutCart = (req, res, next) => {
             let newOrder = new Order({
                 datePlaced: new Date(),
                 shippingCost: 0,
-                totalCost: totalPrice,
+                totalCost: totalPrice.toFixed(2),
                 totalItems: totalItems,
                 canceled: false,
                 user: req.user._id,
