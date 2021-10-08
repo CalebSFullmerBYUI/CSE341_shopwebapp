@@ -1,5 +1,8 @@
 const Product = require("../models/product");
+const Order = require("../models/order");
+const User = require("../models/user");
 const { search } = require("../routes/routes");
+const product = require("../models/product");
 
 let productsSearch = [];
 let previousSearch = "";
@@ -13,13 +16,17 @@ exports.loadSearchPage = (req, res, next) => {
         Product.find().then(products => {
             res.render("pages/products-search", {
                 title: "Search",
-                products: products
+                products: products,
+                user: req.user,
+                cart: false
             });
         });
     } else {
         res.render("pages/products-search", {
             title: "Search",
-            products: productsSearch
+            products: productsSearch,
+            user: req.user,
+            cart: false
         });
     }
 }
@@ -52,6 +59,36 @@ exports.loadEditPage = (req, res, next) => {
             })
         });
     }
+}
+
+exports.loadCartPage = (req, res, next) => {
+    let cartIdArr = [];
+
+    for (item of req.user.cart) {
+        cartIdArr.push(item._id);
+    }
+
+    Product.find({"_id": {$in: cartIdArr}}).then(products => {
+        res.render("pages/cart", {
+            title: "Cart",
+            products: products,
+            user: req.user,
+            cart: true
+        });
+    }).catch(err => {
+        console.log("Issue loading cart. " + err);
+    });
+}
+
+exports.loadOrdersPage = (req, res, next) => {
+    Order.find({"user": req.user._id}).then(orders => {
+        res.render("pages/orders", {
+            title: "Orders",
+            orders: orders,
+        });
+    }).catch(err => {
+        console.log("Issue loading orders. " + err);
+    });
 }
 
 exports.editProduct = (req, res, next) => {
@@ -122,25 +159,93 @@ exports.searchProducts = (req, res, next) => {
     }).catch(err => {
         console.log("Issue running product search. " + err );
     });
-    
-    /*products => {
-        let searchTerm = req.body.searchQuery.toLowerCase();
+}
 
-        for (product of products) {
-            if (product.name && product.name.toLowerCase().search(searchTerm) != -1) {
-                foundItems.push(product);
-            } else {
-                for (tag of product.tags) {
-                    if (tag.toLowerCase() == searchTerm) {
-                        foundItems.push(product);
-                        break;
-                    }
+exports.addToCart = (req, res, next) => {
+    console.log("Adding to cart product with _id " + req.params.productId);
+    Product.findById(req.params.productId)
+        .then(product => {
+            if (req.user)
+            {
+                let quantity = parseInt(req.body.quantity);
+                let oldItemIndex = req.user.cart.findIndex(item => {return item._id.toString() == product._id; });
+                if (oldItemIndex > -1) {
+                    // If the item already exists, just increase the quatnity by 1.
+                    req.user.cart[oldItemIndex].itemQuantity = quantity;
+                    req.user.save();
+                } else {
+                    // Add new
+                    req.user.cart.push({
+                        _id: product._id,
+                        itemQuantity: quantity
+                    });
+                    req.user.save();
                 }
             }
+        })
+        .catch(err => {
+            console.log("Failed to add product with _id " + req.params.productId + " to cart. " + err);
+        });
+    res.redirect("/");
+}
+
+exports.removeFromCart = (req, res, next) => {
+    console.log("Removing from cart product with _id " + req.params.productId);
+        if (req.user)
+        {
+            let oldItemIndex = req.user.cart.findIndex(item => {return item._id.toString() == req.params.productId; });
+            if (oldItemIndex > -1) {
+                // If the item already exists, just increase the quatnity by 1.
+                req.user.cart.splice(oldItemIndex, 1);
+                req.user.save();
+            } else {
+                console.log("No item with id " + req.params.productId + " found in cart for user " + req.user._id);
+            }
+        }
+    res.redirect("/");
+}
+
+exports.checkoutCart = (req, res, next) => {
+    console.log("Checking out cart for user");
+
+    let cartIdArr = []
+
+    for (item of req.user.cart) {
+        cartIdArr.push(item._id);
+    }
+
+    Product.find({"_id": {$in: cartIdArr}}).then(products => {
+        let totalPrice = 0;
+        let totalItems = 0;
+
+        for (item of products) {
+            let productWithQuantity = req.user.cart.find(cartItem => {return cartItem._id.toString() == item._id});
+            if (!productWithQuantity) { console.log("Error checking out cart, could not match quantity to price."); }
+            totalItems += productWithQuantity.itemQuantity;
+            totalPrice += item.price * productWithQuantity.itemQuantity;
         }
 
-        productsSearch = foundItems;
+        if (req.user) {
+            let newOrder = new Order({
+                datePlaced: new Date(),
+                shippingCost: 0,
+                totalCost: totalPrice,
+                totalItems: totalItems,
+                canceled: false,
+                user: req.user._id,
+                address: null,
+                items: req.user.cart
+            });
+    
+            newOrder.save();
+    
+            // Reset user cart
+            req.user.cart = [];
+            req.user.save();
+        }
+    }).catch(err => {
+        console.log("Issue checkingout cart. " + err);
+    });
 
-        res.redirect("/search");
-    }*/
+    res.redirect("/");
 }

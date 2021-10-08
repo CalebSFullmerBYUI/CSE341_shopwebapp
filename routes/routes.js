@@ -22,4 +22,14 @@ router.post("/edit-product/:productId", productsControl.editProduct);
 
 router.post("/remove-product/:productId", productsControl.removeProduct);
 
+router.post("/add-to-cart/:productId", productsControl.addToCart);
+
+router.post("/remove-from-cart/:productId", productsControl.removeFromCart);
+
+router.get("/cart", productsControl.loadCartPage);
+
+router.post("/checkout", productsControl.checkoutCart);
+
+router.get("/orders", productsControl.loadOrdersPage);
+
 module.exports = router;

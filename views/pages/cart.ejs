@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><%= title %></title>
+        <% include ../includes/header.ejs %>
+    </head>
+
+    <body>
+        <% include ../includes/banner.ejs%>
+        <div style="display: flex; align-items: center; flex-direction: column; padding-top: 10px;">
+
+            <% if (products.length == 0) { %>
+                <p>No products in cart.</p>
+            <% } %>
+
+            <% for (product of products) {%>
+                <% include ../includes/product.ejs %>
+            <% } %>
+
+            <% if (products.length > 0) { %>
+                <div>
+                    <form action="/checkout" method="POST">
+                        <input type="submit" value="Checkout" class="btn btn-secondary">
+                    </form>
+                </div>
+            <% } %>
+        </div>
+    </body>
+</html>

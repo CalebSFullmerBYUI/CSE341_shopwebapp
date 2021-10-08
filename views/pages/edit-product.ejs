@@ -3,6 +3,14 @@
     <head>
         <title><%= title %></title>
         <% include ../includes/header.ejs %>
+
+        <script>
+            function addTag() {
+            }
+
+            function removeTag() {
+            }
+        </script>
     </head>
 
     <body>
@@ -26,6 +34,14 @@
                     <label>Picture URL</label>
                     <input type="text" name="pictureURL" style="width: 100%" value="<%= product.pictureURL %>">
                 </div>
+                <!--<div style="margin-bottom: 10px;">
+                    <% for (tag of product.tags) { %>
+                        <div>
+                            <p><%= tag %></p>
+                            <a href="removeSpec"></a>
+                        </div>
+                    <% } %>
+                </div>-->
                 <input type="submit" value="submit">
             </form>
         </div>

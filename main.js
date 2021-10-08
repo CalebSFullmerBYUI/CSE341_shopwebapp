@@ -2,7 +2,9 @@ const express = require("express");
 const bodyParser = require('body-parser');
 const path = require("path");
 const mongoose = require("mongoose");
-const cors = require('cors') // Place this with other requires (like 'path' and 'express')
+const cors = require("cors") // Place this with other requires (like 'path' and 'express')
+
+const User = require("./models/user");
 
 
 
@@ -30,6 +32,17 @@ app.set("views", path.join(__dirname, "views"))
     .set("view engine", "ejs")
     .use(cors(corsOptions))
     .use(bodyParser({ extended: false }))
+    .use((req, res, next) => {
+        User.findById("616064be01105a70ea5c3bcf")
+            .then(user => {
+                req.user = user;
+                next();
+            })
+            .catch(err => {
+                console.log("Issue getting user. " + err);
+                next();
+            });
+    })
     .use("/", routes);
 
 mongoose.connect(MONGODB_URL).then(result => {

@@ -5,12 +5,6 @@ const productSchema = new mongoose.Schema({
     productID: String,
     price: Number,
     description: String,
-    specifications: [
-        {
-            specification: String,
-            data: String
-        }
-    ],
     pictureURL: String,
     tags: [String]
 });
