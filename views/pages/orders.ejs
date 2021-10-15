@@ -7,6 +7,7 @@
 
     <body>
         <% include ../includes/banner.ejs%>
+        <% include ../includes/error.ejs%>
         <div style="display: flex; align-items: center; flex-direction: column; padding-top: 10px;">
 
             <% if (orders.length == 0) { %>
@@ -19,6 +20,8 @@
                     <p><b>Shipping Cost: </b> $<%= order.shippingCost %></p>
                     <p><b>Total Cost: </b> $<%= order.totalCost %></p>
                     <p><b>Number of Items: </b> <%= order.totalItems %></p>
+                    <% let address = order.address; %>
+                    <% include ../includes/address.ejs%>
                 </div>
             <% } %>
         </div>

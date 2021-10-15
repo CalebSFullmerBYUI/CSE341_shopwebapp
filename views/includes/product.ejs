@@ -9,35 +9,42 @@
     <% if (product.description != "") { %>
         <p><b>Description:</b> <%= product.description %></p>
     <% } %>
-    <form action="/add-to-cart/<%= product._id %>" method="POST">
-        <input type="number" name="quantity" min="1" step="1" style="width: 100%"
-        <% let itemIndex = user.cart.findIndex(item => { return item._id.toString() == product._id })
-            if (itemIndex > -1) {%>
-                value="<%= user.cart[itemIndex].itemQuantity %>"
-        <% } else { %>
-            value=1
-        <% } %>
-        >
-        <input type="submit"
-        <% if (itemIndex > -1) {%>
-            value="Change Quantity"
-        <% } else { %>
-            value="Add to Cart"
-        <% } %> class="btn btn-secondary">
-    </form>
+    <% let itemIndex = -1;
+       if (isLoggedIn) { %>
+        <form action="/add-to-cart/<%= product._id %>" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfT %>">
+            <input type="number" name="quantity" min="1" step="1" style="width: 100%"
+            <% itemIndex = user.cart.findIndex(item => { return item._id.toString() == product._id })
+                if (itemIndex > -1) {%>
+                    value="<%= user.cart[itemIndex].itemQuantity %>"
+            <% } else { %>
+                value=1
+            <% } %>
+            >
+            <input type="submit"
+            <% if (itemIndex > -1) {%>
+                value="Change Quantity"
+            <% } else { %>
+                value="Add to Cart"
+            <% } %> class="btn btn-secondary">
+        </form>
+    <% } %>
 
-    <% if (itemIndex > -1) { %>
+    <% if (itemIndex > -1 && isLoggedIn) { %>
         <form action="/remove-from-cart/<%= product._id %>" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfT %>">
             <input type="submit" value="Remove From Cart" class="btn btn-secondary">
         </form>
     <% } %>
 
-    <% if (!cart) { %>
+    <% if (!cart && isAdmin) { %>
         <form action="/remove-product/<%= product._id %>" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfT %>">
             <input type="submit" value="Delete Product" class="btn btn-secondary">
         </form>
 
         <form action="/edit-product/<%= product._id %>" method="GET">
+            <input type="hidden" name="_csrf" value="<%= csrfT %>">
             <input type="submit" value="Edit Product" class="btn btn-secondary">
         </form>
     <% } %>

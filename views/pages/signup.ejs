@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <% include ../includes/header.ejs%>
+    </head>
+
+    <body>
+        <% include ../includes/banner.ejs%>
+        <% include ../includes/error.ejs%>
+        <form action="/signup" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfT %>">
+            <label>Name: </label>
+            <input type="text" name="newName">
+            <label>Username: </label>
+            <input type="text" name="newUsername">
+            <label>Email: </label>
+            <input type="email" name="userEmail">
+            <label>Password: </label>
+            <input type="password" name="userPass">
+            <input type="submit" value="Sign-Up">
+        </form>
+    </body>
+</html>

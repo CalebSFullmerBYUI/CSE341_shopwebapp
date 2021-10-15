@@ -11,6 +11,7 @@ const orderSchema = new mongoose.Schema({
         ref: "User"
     },
     address: {
+        _id: mongoose.Schema.Types.ObjectId,
         address: String,
         city: String,
         state: String,

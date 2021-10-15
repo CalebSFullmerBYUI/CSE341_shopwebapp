@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <% include ../includes/header.ejs%>
+    </head>
+
+    <body>
+        <% include ../includes/banner.ejs%>
+        <% include ../includes/error.ejs%>
+        <form action="/login" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfT %>">
+            <label>Username or Email: </label>
+            <input type="text" name="usernameOrEmail">
+            <label>Password: </label>
+            <input type="password" name="userPass">
+            <input type="submit" value="Log-In">
+        </form>
+    </body>
+</html>

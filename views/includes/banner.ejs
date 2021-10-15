@@ -1,16 +1,39 @@
-<div class="row" style="position: sticky; top: 0;">
-    <div class="col-md-10 col-md-offset-1" style="display: flex">
-        <div style="background-color: coral; flex-basis: 60%;">
-            <a href="/">Home</a>
-            <a href="/search">Search</a>
-            <a href="/cart">Cart</a>
-            <a href="/orders">Orders</a>
-            <a href="/add-product">Add Product</a>
+<div id="banner" class="row">
+    <div id="banner-body" class="col-md-10 col-md-offset-1">
+
+        <div id="banner-links">
+            <div id="banner-main-links">
+                <a class="btn btn-outline-light" href="/">Home</a>
+                <a class="btn btn-outline-light" href="/search">Search</a>
+                <% if (isLoggedIn) { %>
+                    <a class="btn btn-outline-light" href="/cart">Cart</a>
+                    <a class="btn btn-outline-light" href="/orders">Orders</a>
+                    <a class="btn btn-outline-light" href="/profile">Profile</a>
+                <% } %>
+            </div>
+
+            <div id="banner-login-links">
+                <% if (isLoggedIn) { %>
+                    <form style="display: inline;" action="/logout" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                        <input class="btn btn-dark" type="submit" value="Log-out">
+                    </form>
+                <% } else { %>
+                    <a class="btn btn-dark" href="/login">Log-in</a>
+                    <a class="btn btn-dark" href="/signup">Sign-up</a>
+                <% } %>
+
+                <% if (isAdmin && isLoggedIn) { %>
+                    <a class="btn btn-info" href="/add-product">Add Product</a>
+                <% } %>
+            </div>
         </div>
-        <div style="background-color: purple; flex-basis: 40%;">
-            <form action="/search" method="POST">
-                <input type="text" name="searchQuery">
-                <button type="submit">Search</button>
+
+        <div id="banner-search">
+            <form id="banner-search-form" action="/search" method="POST" style="width: 100%;">
+                <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                <input class="form-control" type="text" name="searchQuery">
+                <button class="btn btn-light" type="submit">Search</button>
             </form>
         </div>
     </div>

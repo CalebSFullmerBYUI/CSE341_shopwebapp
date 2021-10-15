@@ -7,19 +7,30 @@
 
     <body>
         <% include ../includes/banner.ejs%>
+        <% include ../includes/error.ejs%>
         <div style="display: flex; align-items: center; flex-direction: column; padding-top: 10px;">
 
             <% if (products.length == 0) { %>
                 <p>No products in cart.</p>
             <% } %>
 
-            <% for (product of products) {%>
+            <% for (product of products) { %>
                 <% include ../includes/product.ejs %>
             <% } %>
 
-            <% if (products.length > 0) { %>
+            <h3>Delivery Address: </h3>
+
+            <% if (products.length > 0 && isLoggedIn) { %>
                 <div>
                     <form action="/checkout" method="POST">
+                        <% let count = 0;
+                           for (address of user.addresses) { %>
+                            <div>
+                                <input type="radio" name="deliveryAddress" value="<%= address._id%>">
+                                <% include ../includes/address.ejs%>
+                            </div>
+                        <% } %>
+                        <input type="hidden" name="_csrf" value="<%= csrfT %>">
                         <input type="submit" value="Checkout" class="btn btn-secondary">
                     </form>
                 </div>

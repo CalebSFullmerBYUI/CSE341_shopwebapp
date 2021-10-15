@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <% include ../includes/header.ejs%>
+    </head>
+
+    <body>
+        <% include ../includes/banner.ejs%>
+        <% include ../includes/error.ejs%>
+        <p><b>Name: </b><%= user.name %></p>
+        <p><b>Username: </b><%= user.username %></p>
+        <p><b>Admin: </b><%= isAdmin %></p>
+        <h3>Addresses:</h3>
+        <% for (address of user.addresses) { %>
+            <% include ../includes/address.ejs%>
+            <form action="/edit-address/<%= address._id %>" method="GET">
+                <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                <input type="submit" value="Edit Address" class="btn btn-secondary">
+            </form>
+            <form action="/remove-address/<%= address._id %>" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                <input type="submit" value="Remove Address" class="btn btn-secondary">
+            </form>
+        <% } %>
+        
+        <form action="/add-address" method="GET">
+            <input type="hidden" name="_csrf" value="<%= csrfT %>">
+            <input type="submit" value="Add New Address" class="btn btn-secondary">
+        </form>
+    </body>
+</html>
