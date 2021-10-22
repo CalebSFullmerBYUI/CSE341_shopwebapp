@@ -1,4 +1,4 @@
-<div id="banner" class="row">
+<div id="banner">
     <div id="banner-body" class="col-md-10 col-md-offset-1">
 
         <div id="banner-links">
@@ -32,7 +32,7 @@
         <div id="banner-search">
             <form id="banner-search-form" action="/search" method="POST" style="width: 100%;">
                 <input type="hidden" name="_csrf" value="<%= csrfT %>">
-                <input class="form-control" type="text" name="searchQuery">
+                <input class="form-control" type="text" name="searchQuery" value="<%= productSearch %>">
                 <button class="btn btn-light" type="submit">Search</button>
             </form>
         </div>

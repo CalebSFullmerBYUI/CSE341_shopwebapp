@@ -2,49 +2,41 @@
 <html>
     <head>
         <title><%= title %></title>
-        <% include ../includes/header.ejs %>
-
-        <script>
-            function addTag() {
-            }
-
-            function removeTag() {
-            }
-        </script>
+        <% include ../includes/header.ejs%>
     </head>
 
     <body>
         <% include ../includes/banner.ejs%>
         <% include ../includes/error.ejs%>
         <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
-            <form action="<% if (product.productID != -1) { %>/edit-product/<%= product._id %><% } else { %>/add-product<% } %>" method="POST" style="display: flex; flex-direction: column; width: 50%;">
+            <form action="<% if (product.productID != -1) { %>/edit-product/<%= product._id %><% } else { %>/add-product<% } %>" method="POST" style="font-size: 20px; display: flex; flex-direction: column; width: 50%;">
                 <input type="hidden" name="_csrf" value="<%= csrfT %>">
                 <div style="margin-bottom: 10px;">
-                    <label>Product Name</label>
-                    <input type="text" name="productName" style="width: 100%" value="<%= product.name %>">
+                    <label><b>Product Name</b></label>
+                    <input class="form-control" type="text" name="productName" style="width: 100%"
+                        <% if (previousForm.name == "editProduct" && previousForm.productName) { %>value="<%= previousForm.productName %>"<% } else { %>
+                        value="<%= product.name %>"<% } %>>
                 </div>
                 <div style="margin-bottom: 10px;">
-                    <label>Price</label>
-                    <input type="number" name="productPrice" min="0" step="0.01" style="width: 100%" value="<%= product.price %>">
+                    <label><b>Price</b></label>
+                    <input class="form-control" type="number" name="productPrice" min="0" step="0.01" style="width: 100%"
+                        <% if (previousForm.name == "editProduct" && previousForm.productPrice) { %>value="<%= previousForm.productPrice %>"<% } else { %>
+                            value="<%= product.price %>"<% } %>>
                 </div>
                 <div style="margin-bottom: 10px;">
-                    <label>Description</label>
-                    <textarea type="textarea" name="productDescription" rows="5"
-                        style="width: 100%; resize: none; overflow-y: scroll;"><%= product.description %></textarea>
+                    <label><b>Description</b></label>
+                    <textarea class="form-control" type="textarea" name="productDescription" rows="5"
+                        style="width: 100%; resize: none; overflow-y: scroll;"><%
+                            if (previousForm.name == "editProduct" && previousForm.productDescription) {
+                                %><%= previousForm.productDescription %><% } else { %><%= product.description %><% } %></textarea>
                 </div>
                 <div style="margin-bottom: 10px;">
-                    <label>Picture URL</label>
-                    <input type="text" name="pictureURL" style="width: 100%" value="<%= product.pictureURL %>">
+                    <label><b>Picture URL</b></label>
+                    <input class="form-control" type="text" name="pictureURL" style="width: 100%"
+                        <% if (previousForm.name == "editProduct" && previousForm.pictureURL) { %>value="<%= previousForm.pictureURL %>"<% } else { %>
+                            value="<%= product.pictureURL %>"<% } %>>
                 </div>
-                <!--<div style="margin-bottom: 10px;">
-                    <% for (tag of product.tags) { %>
-                        <div>
-                            <p><%= tag %></p>
-                            <a href="removeSpec"></a>
-                        </div>
-                    <% } %>
-                </div>-->
-                <input type="submit" value="submit">
+                <input type="submit" value="Submit" class="btn btn-dark" style="font-size: 20px; width: 100%;">
             </form>
         </div>
     </body>

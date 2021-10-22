@@ -9,25 +9,33 @@
         <% include ../includes/banner.ejs%>
         <% include ../includes/error.ejs%>
         <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
-            <form action="<% if (address._id) { %>/edit-address/<%= address._id %><% } else { %>/add-address<% } %>" method="POST" style="display: flex; flex-direction: column; width: 50%;">
+            <form action="<% if (address._id) { %>/edit-address/<%=address._id%><% } else { %>/add-address<% } %>" method="POST" style="font-size: 20px; display: flex; flex-direction: column; width: 50%;">
                 <input type="hidden" name="_csrf" value="<%= csrfT %>">
                 <div style="margin-bottom: 10px;">
-                    <label>Address Line 1</label>
-                    <input type="text" name="addressLine1" style="width: 100%" value="<%= address.address %>">
+                    <label><b>Address Line 1</b></label>
+                    <input class="form-control" type="text" name="addressLine1" style="width: 100%"
+                        <% if (previousForm.name == "editAddress" && previousForm.addressLine1) { %>value="<%= previousForm.addressLine1 %>"<% } else { %>
+                            value="<%= address.address %>"<% } %>>
                 </div>
                 <div style="margin-bottom: 10px;">
-                    <label>City</label>
-                    <input type="text" name="addressCity" style="width: 100%" value="<%= address.city %>">
+                    <label><b>City</b></label>
+                    <input class="form-control" type="text" name="addressCity" style="width: 100%"
+                        <% if (previousForm.name == "editAddress" && previousForm.addressCity) { %>value="<%= previousForm.addressCity %>"<% } else { %>
+                            value="<%= address.city %>"<% } %>>
                 </div>
                 <div style="margin-bottom: 10px;">
-                    <label>State or Province</label>
-                    <input type="text" name="addressState" style="width: 100%" value="<%= address.state %>">
+                    <label><b>State or Province</b></label>
+                    <input class="form-control" type="text" name="addressState" style="width: 100%"
+                        <% if (previousForm.name == "editAddress" && previousForm.addressState) { %>value="<%= previousForm.addressState %>"<% } else { %>
+                            value="<%= address.state %>"<% } %>>
                 </div>
                 <div style="margin-bottom: 10px;">
-                    <label>Country:</label>
-                    <input type="text" name="addressCountry" style="width: 100%" value="<%= address.country %>">
+                    <label><b>Country:</b></label>
+                    <input class="form-control" type="text" name="addressCountry" style="width: 100%"
+                        <% if (previousForm.name == "editAddress" && previousForm.addressCountry) { %>value="<%= previousForm.addressCountry %>"<% } else { %>
+                            value="<%= address.country %>"<% } %>>
                 </div>
-                <input type="submit" value="submit">
+                <input type="submit" value="Submit" class="btn btn-dark" style="font-size: 20px; width: 100%;">
             </form>
         </div>
     </body>

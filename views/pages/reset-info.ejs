@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <% include ../includes/header.ejs%>
+    </head>
+
+    <body>
+        <% include ../includes/banner.ejs%>
+        <% include ../includes/error.ejs%>
+        <div style="display: flex; align-items: center; justify-content: center;">
+            <form action="/reset-info/<% if (resetType == 'password') { %>password<% } else if (resetType == 'username') { %>username<% } else { %>email<% } %>"
+                method="POST" class="loginform">
+                <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                <label><b><% if (resetType == "Password") { %>Old <% } %>Password:</b></label>
+                <input class="form-control" type="password" name="oldPassword"
+                    <% if (previousForm.oldPassword) { %>value="<%= previousForm.oldPassword %>"<% } %>>
+                <% if (resetType == "password") { %>
+                    <label><b>New Password:</b></label>
+                    <input class="form-control" type="password" name="newPass"
+                        <% if (previousForm.name == "resetPass" && previousForm.newPass) { %>value="<%= previousForm.newPass %>"<% } %>>
+                <% } else if (resetType == "username") { %>
+                    <label><b>New Username:</b></label>
+                    <input class="form-control" type="password" name="newUsername"
+                        <% if (previousForm.name == "resetUsername" && previousForm.newUsername) { %>value="<%= previousForm.newUsername %>"<% } %>>
+                <% } else { %>
+                    <label><b>New Email:</b></label>
+                    <input class="form-control" type="email" name="newEmail"
+                        <% if (previousForm.name == "resetEmail" && previousForm.newEmail) { %>value="<%= previousForm.newEmail %>"<% } %>>
+                <% } %>
+                <input type="submit" value="Reset" class="btn btn-dark" style="margin-top: 1em;">
+            </form>
+        </div>
+    </body>
+</html>

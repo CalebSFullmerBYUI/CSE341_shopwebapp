@@ -8,6 +8,18 @@
     <body>
         <% include ../includes/banner.ejs%>
         <% include ../includes/error.ejs%>
-        <h3>See search page for products</h3>
+        <div style="display: flex; align-items: center; flex-direction: column; padding-top: 10px;">
+            <h3>Welcome to our store.</h3>
+
+            <% if (products.length == 0) { %>
+                <p>Search returned no results.</p>
+            <% } %>
+
+            <% for (product of products) {%>
+                <% include ../includes/product.ejs %>
+            <% } %>
+            
+            <h5>Use our search feature to view more results.</h5>
+        </div>
     </body>
 </html>

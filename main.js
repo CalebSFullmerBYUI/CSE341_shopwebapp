@@ -57,6 +57,18 @@ app.set("views", path.join(__dirname, "views"))
             req.session.previousSearch = "/";
         }
 
+        if (!req.session.previousForm) {
+            req.session.previousForm = { name: "default"};
+        }
+
+        if (!req.session.productSearch) {
+            req.session.productSearch = "";
+        }
+
+        if (!req.session.foundProducts) {
+            req.session.foundProducts = [];
+        }
+
         if (req.session.user) {
         User.findById(req.session.user._id)
             .then(user => {

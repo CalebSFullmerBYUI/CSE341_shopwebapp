@@ -5,12 +5,22 @@ const { search } = require("../routes/routes");
 const product = require("../models/product");
 const user = require("../models/user");
 const bcrypt = require("bcryptjs");
+const { validationResult } = require("express-validator");
 const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
+
+const transporter = nodemailer.createTransport(sendgridTransport({
+    auth: {
+        api_key: ""
+    }
+}));
 
 
 // Login
 exports.loadLoginPage = (req, res, next) => {
+    let previousForm = req.session.previousForm;
+    req.session.previousForm = {};
+
     if (req.session && req.session.isLoggedIn) {
         req.flash("generalError", "Already logged in.");
         res.redirect(req.session.previousSearch);
@@ -20,48 +30,70 @@ exports.loadLoginPage = (req, res, next) => {
             isLoggedIn: req.session.isLoggedIn,
             isAdmin: (req.user && req.user.isAdmin),
             errorMessage: req.flash("loginError"),
+            productSearch: req.session.productSearch,
+            previousForm: previousForm,
             csrfT: req.csrfToken() // Add this input to all incoming forms <input type="hidden" name="_csrf" value="<%= csrfT %>">
         });
     }
 }
 
 exports.checkLogin = (req, res, next) => {
-    User.findOne({$or: [
-        {username: req.body.usernameOrEmail.trim()},
-        {email: req.body.usernameOrEmail.trim()}
-    ]})
-    .then(user => {
-        if (!user) {
-            // User not defined.
-            req.flash("loginError", "Invalid email/username.");
-            res.redirect("/login");
-        } else {
-            bcrypt.compare(req.body.userPass.trim(), user.password)
-                .then(doMatch => {
-                    if (!doMatch) {
-                        // Incorrect password entered.
-                        req.flash("loginError", "Invalid password.");
-                        res.redirect("/login");
-                    } else {
-                        req.session.user = user;
-                        req.session.isLoggedIn = true;
-                        res.redirect(req.session.previousSearch);
-                    }
-                })
-                .catch(err => {
-                    console.log("Issue comparing passwords on login. " + err);
-                    res.redirect("/login");
-                });
-        }
-    })
-    .catch(err => {
-        req.flash("loginError", "Issue checking email/username.");
-        console.log("Issue getting user. " + err);
+    let errors = validationResult(req);
+
+    req.session.previousForm = {
+        name: "login",
+        usernameOrEmail: req.body.usernameOrEmail.trim(),
+        userPass: req.body.userPass.trim()
+    }
+
+    if (!errors.isEmpty()) {
+        // There were input validation errors.
+        req.flash("loginError", errors.array()[0].msg);
         res.redirect("/login");
-    });
+    } else if (req.session && req.session.isLoggedIn) {
+        req.flash("generalError", "Already logged in.");
+        res.redirect(req.session.previousSearch)
+    } else {
+        User.findOne({$or: [
+            {username: req.body.usernameOrEmail.trim()},
+            {email: req.body.usernameOrEmail.trim()}
+        ]})
+        .then(user => {
+            if (!user) {
+                // User not defined.
+                req.flash("loginError", "Invalid email/username.");
+                res.redirect("/login");
+            } else {
+                bcrypt.compare(req.body.userPass.trim(), user.password)
+                    .then(doMatch => {
+                        if (!doMatch) {
+                            // Incorrect password entered.
+                            req.flash("loginError", "Invalid password.");
+                            res.redirect("/login");
+                        } else {
+                            req.session.user = user;
+                            req.session.isLoggedIn = true;
+                            res.redirect(req.session.previousSearch);
+                        }
+                    })
+                    .catch(err => {
+                        console.log("Issue comparing passwords on login. " + err);
+                        res.redirect("/login");
+                    });
+            }
+        })
+        .catch(err => {
+            req.flash("loginError", "Issue checking email/username.");
+            console.log("Issue getting user. " + err);
+            res.redirect("/login");
+        });
+    }
 }
 
 exports.loadSignupPage = (req, res, next) => {
+    let previousForm = req.session.previousForm;
+    req.session.previousForm = {};
+
     if (req.session && req.session.isLoggedIn) {
         req.flash("generalError", "Already logged in.");
         res.redirect(req.session.previousSearch)
@@ -71,13 +103,29 @@ exports.loadSignupPage = (req, res, next) => {
             isLoggedIn: req.session.isLoggedIn,
             isAdmin: (req.user && req.user.isAdmin),
             errorMessage: req.flash("signupError"),
+            productSearch: req.session.productSearch,
+            previousForm: previousForm,
             csrfT: req.csrfToken()
         });
     }
 }
 
 exports.signupUser = (req, res, next) => {
-    if (req.session && req.session.isLoggedIn) {
+    let errors = validationResult(req);
+
+    req.session.previousForm = {
+        name: "signup",
+        newName: req.body.newName,
+        newUsername: req.body.newUsername,
+        userEmail: req.body.userEmail,
+        userPass: req.body.userPass
+    }
+
+    if (!errors.isEmpty()) {
+        // There were input validation errors.
+        req.flash("signupError", errors.array()[0].msg);
+        res.redirect("/signup");
+    } else if (req.session && req.session.isLoggedIn) {
         req.flash("generalError", "Already logged in.");
         res.redirect(req.session.previousSearch)
     } else {
@@ -103,14 +151,14 @@ exports.signupUser = (req, res, next) => {
                     });
     
                     newUser.save().then(result => {
-                        /*transporter.sendMail({
+                        transporter.sendMail({
                             to: req.body.userEmail.trim(),
-                            from: "cse341Shop@cse341Shop.com",
+                            from: "calebsf@byui.edu",
                             subject: "Signup Confermation",
                             html: "<p>You signed up.</p>"
                         }).catch(err => {
-                            console.log("Could not send new signup email for email " + req.body.userEmail.trim());
-                        });*/
+                            console.log("Could not send new signup email for email " + req.body.userEmail.trim() + err);
+                        });
                         res.redirect("/login");
                     });
                 }).catch(err => {
@@ -139,6 +187,170 @@ exports.logoutUser = (req, res, next) => {
 
 
 
+// Reset Info
+exports.loadResetInfoPage = (req, res, next) => {
+    let previousForm = req.session.previousForm;
+    req.session.previousForm = {};
+
+    if (req.session && req.session.isLoggedIn && req.user) {
+        req.session.previousSearch = req.url;
+        let urlSplit = req.url.split('/'); // Expect url to end with /password, /username, or /email
+        let resetType = urlSplit[urlSplit.length - 1];
+        urlSplit = resetType.split('?');
+        resetType = urlSplit[0];
+        
+        res.render("pages/reset-info", {
+            title: "Reset " + resetType,
+            resetType: resetType,
+            isLoggedIn: req.session.isLoggedIn,
+            isAdmin: (req.user && req.user.isAdmin),
+            errorMessage: req.flash("resetError"),
+            productSearch: req.session.productSearch,
+            previousForm: previousForm,
+            csrfT: req.csrfToken() // Add this input to all incoming forms <input type="hidden" name="_csrf" value="<%= csrfT %>">
+        });
+    } else {
+        req.flash("generalError", "User not recognized, cannot reset information.");
+        res.redirect(req.session.previousSearch);
+    }
+
+    
+    // Reset previousForm
+    req.session.previousForm = {};
+}
+
+exports.resetPassword = (req, res, next) => {
+    let errors = validationResult(req);
+
+    req.session.previousForm = {
+        name: "resetPass",
+        newPass: req.body.newPass,
+        oldPassword: req.body.oldPassword
+    }
+
+    if (!errors.isEmpty()) {
+        // There were input validation errors.
+        req.flash("resetError", errors.array()[0].msg);
+        res.redirect(req.session.previousSearch);
+    } else {
+        bcrypt.compare(req.body.oldPassword.trim(), req.user.password)
+        .then(doMatch => {
+            if (!doMatch) {
+                // Incorrect password entered.
+                req.flash("resetError", "Old password does not match user records.");
+                res.redirect(req.session.previousSearch);
+            } else {
+                bcrypt.hash(req.body.newPass.trim(), 12).then(hash => {
+                    req.user.password = hash;
+                    req.user.save()
+                    .then(result => {
+                        req.session.previousForm = {};
+                        res.redirect("/profile");
+                    })
+                    .catch(err => {
+                        req.flash("resetError", "Issue saving new password.");
+                        console.log("Issue saving new password on password reset. " + err);
+                        res.redirect(req.session.previousSearch);
+                    });
+                }).catch(err => {
+                    req.flash("resetError", "Issue saving new password.");
+                    res.redirect(req.session.previousSearch);
+                    console.log("Issue hashing password on password change. " + err);
+                });
+            }
+        })
+        .catch(err => {
+            console.log("Issue comparing passwords on password reset. " + err);
+            res.redirect(req.session.previousSearch);
+        });
+    }
+}
+
+exports.resetUsername = (req, res, next) => {
+    let errors = validationResult(req);
+
+    req.session.previousForm = {
+        name: "resetUsername",
+        newUsername: req.body.newUsername,
+        oldPassword: req.body.oldPassword
+    }
+
+    if (!errors.isEmpty()) {
+        // There were input validation errors.
+        req.flash("resetError", errors.array()[0].msg);
+        res.redirect(req.session.previousSearch);
+    } else {
+        bcrypt.compare(req.body.oldPassword.trim(), req.user.password)
+        .then(doMatch => {
+            if (!doMatch) {
+                // Incorrect password entered.
+                req.flash("resetError", "Password does not match user records.");
+                res.redirect(req.session.previousSearch);
+            } else {
+                req.user.username = req.body.newUsername.trim();
+                req.user.save()
+                .then(result => {
+                    req.session.previousForm = {};
+                    res.redirect("/profile");
+                })
+                .catch(err => {
+                    req.flash("resetError", "Issue saving new username.");
+                    console.log("Issue saving new username on username reset. " + err);
+                    res.redirect(req.session.previousSearch);
+                });
+            }
+        })
+        .catch(err => {
+            req.flash("resetError", "Issue saving new username.");
+            console.log("Issue comparing passwords on username reset. " + err);
+            res.redirect(req.session.previousSearch);
+        });
+    }
+}
+
+exports.resetEmail = (req, res, next) => {
+    let errors = validationResult(req);
+
+    req.session.previousForm = {
+        name: "resetEmail",
+        newEmail: req.body.newEmail,
+        oldPassword: req.body.oldPassword
+    }
+
+    if (!errors.isEmpty()) {
+        // There were input validation errors.
+        req.flash("resetError", errors.array()[0].msg);
+        res.redirect(req.session.previousSearch);
+    } else {
+        bcrypt.compare(req.body.oldPassword.trim(), req.user.password)
+        .then(doMatch => {
+            if (!doMatch) {
+                // Incorrect password entered.
+                req.flash("resetError", "Password does not match user records.");
+                res.redirect(req.session.previousSearch);
+            } else {
+                req.user.email = req.body.newEmail.trim();
+                req.user.save()
+                .then(result => {
+                    req.session.previousForm = {};
+                    res.redirect("/profile");
+                })
+                .catch(err => {
+                    req.flash("resetError", "Issue saving new email.");
+                    console.log("Issue saving new email on email reset. " + err);
+                    res.redirect(req.session.previousSearch);
+                });
+            }
+        })
+        .catch(err => {
+            console.log("Issue comparing passwords on email reset. " + err);
+            res.redirect(req.session.previousSearch);
+        });
+    }
+}
+
+
+
 // Cart
 exports.loadCartPage = (req, res, next) => {
     req.session.previousSearch = req.url;
@@ -158,6 +370,7 @@ exports.loadCartPage = (req, res, next) => {
                 isLoggedIn: req.session.isLoggedIn,
                 isAdmin: (req.user && req.user.isAdmin),
                 errorMessage: req.flash("generalError"),
+                productSearch: req.session.productSearch,
                 csrfT: req.csrfToken()
             });
         }).catch(err => {
@@ -181,6 +394,7 @@ exports.loadOrdersPage = (req, res, next) => {
                 isLoggedIn: req.session.isLoggedIn,
                 isAdmin: (req.user && req.user.isAdmin),
                 errorMessage: req.flash("generalError"),
+                productSearch: req.session.productSearch,
                 csrfT: req.csrfToken()
             });
         }).catch(err => {
@@ -195,7 +409,13 @@ exports.loadOrdersPage = (req, res, next) => {
 }
 
 exports.addToCart = (req, res, next) => {
-    if (req.session && req.session.isLoggedIn) {
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        // There were input validation errors.
+        req.flash("generalError", errors.array()[0].msg);
+        res.redirect(req.session.previousSearch);
+    } else if (req.session && req.session.isLoggedIn) {
         console.log("Adding to cart product with _id " + req.params.productId);
         Product.findById(req.params.productId)
             .then(product => {
@@ -341,6 +561,7 @@ exports.loadProfilePage = (req, res, next) => {
             isLoggedIn: req.session.isLoggedIn,
             isAdmin: (req.user && req.user.isAdmin),
             errorMessage: req.flash("loginError"),
+            productSearch: req.session.productSearch,
             csrfT: req.csrfToken() // Add this input to all incoming forms <input type="hidden" name="_csrf" value="<%= csrfT %>">
         });
     } else {
@@ -357,6 +578,7 @@ exports.loadProfilePage = (req, res, next) => {
             isLoggedIn: req.session.isLoggedIn,
             isAdmin: (req.user && req.user.isAdmin),
             errorMessage: req.flash("loginError"),
+            productSearch: req.session.productSearch,
             csrfT: req.csrfToken() // Add this input to all incoming forms <input type="hidden" name="_csrf" value="<%= csrfT %>">
         });
     } else {
@@ -366,6 +588,9 @@ exports.loadProfilePage = (req, res, next) => {
 }
 
 exports.loadAddressPage = (req, res, next) => {
+    let previousForm = req.session.previousForm;
+    req.session.previousForm = {};
+
     if (req.session && req.session.isLoggedIn && req.user) {
         req.session.previousSearch = req.url;
         if (req.params.addressId) {
@@ -379,6 +604,8 @@ exports.loadAddressPage = (req, res, next) => {
                     isLoggedIn: req.session.isLoggedIn,
                     isAdmin: (req.user && req.user.isAdmin),
                     errorMessage: req.flash("generalError"),
+                    productSearch: req.session.productSearch,
+                    previousForm: previousForm,
                     csrfT: req.csrfToken()
                 });
             } else {
@@ -399,6 +626,8 @@ exports.loadAddressPage = (req, res, next) => {
                 isLoggedIn: req.session.isLoggedIn,
                 isAdmin: (req.user && req.user.isAdmin),
                 errorMessage: req.flash("generalError"),
+                productSearch: req.session.productSearch,
+                previousForm: previousForm,
                 csrfT: req.csrfToken()
             });
         }
@@ -406,10 +635,27 @@ exports.loadAddressPage = (req, res, next) => {
         // Must be logged-in to access this.
         res.redirect("/login");
     }
+
+    // Reset previousForm
+    req.session.previousForm = {};
 }
 
 exports.editAddress = (req, res, next) => {
-    if (req.session && req.session.isLoggedIn && req.user) {
+    let errors = validationResult(req);
+
+    req.session.previousForm = {
+        name: "editAddress",
+        addressLine1: req.body.addressLine1,
+        addressCity: req.body.addressCity,
+        addressState: req.body.addressState,
+        addressCountry: req.body.addressCountry
+    }
+
+    if (!errors.isEmpty()) {
+        // There were input validation errors.
+        req.flash("generalError", errors.array()[0].msg);
+        res.redirect(req.session.previousSearch);
+    } else if (req.session && req.session.isLoggedIn && req.user) {
         req.body.addressLine1 = req.body.addressLine1.trim();
         req.body.addressCity = req.body.addressCity.trim();
         req.body.addressState = req.body.addressState.trim();
@@ -427,6 +673,7 @@ exports.editAddress = (req, res, next) => {
                     country: req.body.addressCountry
                 };
             } else {
+                req.session.previousForm = {};
                 req.flash("generalError", "Could not find address to edit.");
                 console.log("Address with id " + req.params.addressId + " was not found for user " + req.user.id + ".");
                 res.redirect("/profile");
@@ -441,6 +688,8 @@ exports.editAddress = (req, res, next) => {
             });
         }
 
+        req.session.previousForm = {};
+
         req.user.save()
             .then(result => {
                 res.redirect("/profile");
@@ -450,10 +699,12 @@ exports.editAddress = (req, res, next) => {
                 res.redirect("/profile");
             });
     } else if (req.session && req.session.isLoggedIn) {
+        req.session.previousForm = {};
         // User not allowed
         req.flash("generalError", "Only admins can edit and add products.");
         res.redirect("/");
     } else {
+        req.session.previousForm = {};
         // Must sign in to admin account.
         res.redirect("/login");
     }

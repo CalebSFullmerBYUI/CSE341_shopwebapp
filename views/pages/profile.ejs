@@ -7,25 +7,57 @@
     <body>
         <% include ../includes/banner.ejs%>
         <% include ../includes/error.ejs%>
-        <p><b>Name: </b><%= user.name %></p>
-        <p><b>Username: </b><%= user.username %></p>
-        <p><b>Admin: </b><%= isAdmin %></p>
-        <h3>Addresses:</h3>
-        <% for (address of user.addresses) { %>
-            <% include ../includes/address.ejs%>
-            <form action="/edit-address/<%= address._id %>" method="GET">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div style="margin-top: 1em; margin-bottom: 1em; display: flex; align-items: center; justify-content: space-evenly; width: auto; padding: 0.5em; background-color: lightgray; border-radius: 0.5em;">
+                <div style="font-size: 20px; min-width: 15em; background-color: whitesmoke; margin-right: 0.5em; padding: 0.5em; border-radius: 0.5em;">
+                    <p><b>Name: </b><%= user.name %></p>
+                    <p><b>Username: </b><%= user.username %></p>
+                    <p><b>Email: </b><%= user.email %></p>
+                    <p><b>Admin: </b><%= isAdmin %></p>
+                </div>
+
+
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <form action="/reset-info/password" method="GET" style="margin-bottom: 0.5em;">
+                        <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                        <input type="submit" value="Change Password" class="btn btn-dark">
+                    </form>
+                    <form action="/reset-info/username" method="GET" style="margin-bottom: 0.5em;">
+                        <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                        <input type="submit" value="Change Username" class="btn btn-dark">
+                    </form>
+                    <form action="/reset-info/email" method="GET" style="margin-bottom: 0.5em;">
+                        <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                        <input type="submit" value="Change Email" class="btn btn-dark">
+                    </form>
+                </div>
+            </div>
+
+            <h3>Addresses:</h3>
+            <form action="/add-address" method="GET">
                 <input type="hidden" name="_csrf" value="<%= csrfT %>">
-                <input type="submit" value="Edit Address" class="btn btn-secondary">
+                <input type="submit" value="Add New Address" class="btn btn-dark">
             </form>
-            <form action="/remove-address/<%= address._id %>" method="POST">
-                <input type="hidden" name="_csrf" value="<%= csrfT %>">
-                <input type="submit" value="Remove Address" class="btn btn-secondary">
-            </form>
-        <% } %>
-        
-        <form action="/add-address" method="GET">
-            <input type="hidden" name="_csrf" value="<%= csrfT %>">
-            <input type="submit" value="Add New Address" class="btn btn-secondary">
-        </form>
+
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="display: flex; flex-wrap: wrap; justify-content: space-evenly; align-items: center;">
+                    <% for (address of user.addresses) { %>
+                        <div style="display: flex; flex-direction: column; margin: 1em; background-color: skyblue; padding: 0.5em 1.4em 0.5em 0.5em; border-radius: 0.5em;">
+                            <% include ../includes/address.ejs%>
+                            <div style="display: flex; margin-top: 0.5em; align-items: center; justify-content: space-between;">
+                                <form action="/edit-address/<%= address._id %>" method="GET" style="margin-right: 0.5em;">
+                                    <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                                    <input type="submit" value="Edit Address" class="btn btn-dark">
+                                </form>
+                                <form action="/remove-address/<%= address._id %>" method="POST">
+                                    <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                                    <input type="submit" value="Remove Address" class="btn btn-dark">
+                                </form>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

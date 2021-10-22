@@ -8,18 +8,20 @@
     <body>
         <% include ../includes/banner.ejs%>
         <% include ../includes/error.ejs%>
-        <div style="display: flex; align-items: center; flex-direction: column; padding-top: 10px;">
+        <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; padding-top: 10px;">
 
             <% if (orders.length == 0) { %>
                 <p>No orders.</p>
             <% } %>
 
             <% for (order of orders) {%>
-                <div style="width: 50%; margin-bottom: 30px;">
-                    <p><b>Date Placed:</b> <%= order.datePlaced %></p>
-                    <p><b>Shipping Cost: </b> $<%= order.shippingCost %></p>
-                    <p><b>Total Cost: </b> $<%= order.totalCost %></p>
-                    <p><b>Number of Items: </b> <%= order.totalItems %></p>
+                <div style="width: 65%; margin-bottom: 30px; display: flex; background-color: grey; padding: 0.5em;">
+                    <div style="flex-grow: 2; font-size: 24px; margin: 0.5em; padding: 0.5em; background-color: whitesmoke;">
+                        <p><b>Date Placed:</b> <%= order.datePlaced.toLocaleDateString("en-US") %> at <%= order.datePlaced.toLocaleTimeString('en-US') %></p>
+                        <p><b>Shipping Cost: </b> $<%= order.shippingCost %></p>
+                        <p><b>Total Cost: </b> $<%= order.totalCost %></p>
+                        <p><b>Number of Items: </b> <%= order.totalItems %></p>
+                    </div>
                     <% let address = order.address; %>
                     <% include ../includes/address.ejs%>
                 </div>

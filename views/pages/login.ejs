@@ -7,13 +7,17 @@
     <body>
         <% include ../includes/banner.ejs%>
         <% include ../includes/error.ejs%>
-        <form action="/login" method="POST">
-            <input type="hidden" name="_csrf" value="<%= csrfT %>">
-            <label>Username or Email: </label>
-            <input type="text" name="usernameOrEmail">
-            <label>Password: </label>
-            <input type="password" name="userPass">
-            <input type="submit" value="Log-In">
-        </form>
+        <div style="display: flex; align-items: center; justify-content: center;">
+            <form class="loginform" action="/login" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                <label><b>Username or Email:</b></label>
+                <input class="form-control" type="text" name="usernameOrEmail"
+                    <% if (previousForm.name == "login" && previousForm.usernameOrEmail) { %>value="<%= previousForm.usernameOrEmail %>"<% } %>>
+                <label><b>Password:</b></label>
+                <input class="form-control" type="password" name="userPass"
+                    <% if (previousForm.name == "login" && previousForm.userPass) { %>value="<%= previousForm.userPass %>"<% } %>>
+                <input type="submit" value="Log-In" class="btn btn-dark" style="margin-top: 1em;">
+            </form>
+        </div>
     </body>
 </html>

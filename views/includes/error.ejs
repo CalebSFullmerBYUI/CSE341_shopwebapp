@@ -1,1 +1,5 @@
-<% if (errorMessage) { %><div><%= errorMessage %></div><% } %>
+<% if (errorMessage != "") { %>
+    <div style="display: flex; align-items: center; justify-content: center; background-color: salmon; border-radius: 1em; margin: 1em; padding: 0.5em; font-size: 18px;">
+        <span><%= errorMessage %></span>
+    </div>
+<% } %>

@@ -1,51 +1,70 @@
-<div style="width: 50%; margin-bottom: 30px;">
-    <p><b>Name:</b> <%= product.name %></p>
-    <p><b>Price:</b> $<%= product.price %></p>
-
-    <% if (product.pictureURL != "") { %>
-        <img src="<%= product.pictureURL %>">
-    <% } %>
-    
-    <% if (product.description != "") { %>
-        <p><b>Description:</b> <%= product.description %></p>
-    <% } %>
-    <% let itemIndex = -1;
-       if (isLoggedIn) { %>
-        <form action="/add-to-cart/<%= product._id %>" method="POST">
-            <input type="hidden" name="_csrf" value="<%= csrfT %>">
-            <input type="number" name="quantity" min="1" step="1" style="width: 100%"
-            <% itemIndex = user.cart.findIndex(item => { return item._id.toString() == product._id })
-                if (itemIndex > -1) {%>
-                    value="<%= user.cart[itemIndex].itemQuantity %>"
+<div style="display: flex; width: 70%; margin-bottom: 30px; background-color: lightslategrey; border-radius: 10px;">
+    <div style="background-color: lightgrey; display: flex; align-items: center; justify-content: center; margin: 1em; min-width: 20em; min-height: 15em; max-width: 20em; max-height: 15em;">
+        <img style="max-width: 100%; max-height: 100%;"
+            <% if (product.pictureURL != "") { %>
+                src="<%= product.pictureURL %>"
             <% } else { %>
-                value=1
+                src="https://upload.wikimedia.org/wikipedia/commons/7/7b/BigImg.png"
             <% } %>
-            >
-            <input type="submit"
-            <% if (itemIndex > -1) {%>
-                value="Change Quantity"
-            <% } else { %>
-                value="Add to Cart"
-            <% } %> class="btn btn-secondary">
-        </form>
-    <% } %>
+        >
+    </div>
 
-    <% if (itemIndex > -1 && isLoggedIn) { %>
-        <form action="/remove-from-cart/<%= product._id %>" method="POST">
-            <input type="hidden" name="_csrf" value="<%= csrfT %>">
-            <input type="submit" value="Remove From Cart" class="btn btn-secondary">
-        </form>
-    <% } %>
+    <div style="margin: 1em 1em 1em 0; display: flex; flex-direction: column; flex-grow: 2;">
+        <div style="display: flex; flex-direction: column; padding: 0.5em; flex-grow: 2; background-color:whitesmoke; margin-bottom: 0.5em; width: 100%;">
+            <div style="display: flex; font-size: 20px;">
+                <span><b><%= product.name %></b></span>
+                <span style="margin-left: 1em;">$<%= product.price.toFixed(2) %></span>
+            </div>
+    
+            <% if (product.description != "") { %>
+                <p><b>Description:</b> <%= product.description %></p>
+            <% } %>
+        </div>
 
-    <% if (!cart && isAdmin) { %>
-        <form action="/remove-product/<%= product._id %>" method="POST">
-            <input type="hidden" name="_csrf" value="<%= csrfT %>">
-            <input type="submit" value="Delete Product" class="btn btn-secondary">
-        </form>
+        <div style="display: flex;">
+            <div style="flex-grow: 2; display: flex; align-content: center; justify-content: left;">
+                <% let itemIndex = -1;
+                if (isLoggedIn) { %>
+                    <form action="/add-to-cart/<%= product._id %>" method="POST" style="display: flex; align-content: center; justify-content: left;">
+                        <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                        <input class="form-control" style="width: 4em; margin-right: 0.5em;" type="number" name="quantity" min="1" step="1" style="width: 100%"
+                            <% itemIndex = user.cart.findIndex(item => { return item._id.toString() == product._id });
+                            if (itemIndex > -1) {%>
+                                value="<%= user.cart[itemIndex].itemQuantity %>"
+                            <% } else { %>
+                                value=1
+                            <% } %>
+                        >
+                        <input type="submit"
+                        <% if (itemIndex > -1) {%>
+                            value="Change Quantity"
+                        <% } else { %>
+                            value="Add to Cart"
+                        <% } %> class="btn btn-dark" style="margin-right: 0.5em;">
+                    </form>
+                <% } %>
 
-        <form action="/edit-product/<%= product._id %>" method="GET">
-            <input type="hidden" name="_csrf" value="<%= csrfT %>">
-            <input type="submit" value="Edit Product" class="btn btn-secondary">
-        </form>
-    <% } %>
+                <% if (itemIndex > -1 && isLoggedIn) { %>
+                    <form action="/remove-from-cart/<%= product._id %>" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                        <input type="submit" value="Remove" class="btn btn-dark" style="margin-right: 0.5em;">
+                    </form>
+                <% } %>
+            </div>
+
+            <div style="display: flex; align-content: center; justify-content: right;">
+                <% if (!cart && isAdmin) { %>
+                    <form action="/remove-product/<%= product._id %>" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                        <input type="submit" value="Delete Product" class="btn btn-info" style="margin-right: 0.5em;">
+                    </form>
+    
+                    <form action="/edit-product/<%= product._id %>" method="GET">
+                        <input type="hidden" name="_csrf" value="<%= csrfT %>">
+                        <input type="submit" value="Edit Product" class="btn btn-info">
+                    </form>
+                <% } %>
+            </div>
+        </div>
+    </div>
 </div>
